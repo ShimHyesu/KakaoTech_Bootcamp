@@ -1,9 +1,9 @@
 *.pem
 LectureNotes/*
 
-0718_IaC/.terraform/*
-0718_IaC/terraform.tfstate
-0718_IaC/terraform.tfstate.backup
-0718_IaC/.terraform.lock.hcl
+**/.terraform/*
+**/terraform.tfstate
+**/terraform.tfstate.backup
+# **/.terraform.lock.hcl
 
 0721_AWSSDK/node_modules/*
