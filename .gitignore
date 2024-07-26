@@ -1,2 +1,9 @@
 *.pem
-lectures/*
+LectureNotes/*
+
+**/.terraform/*
+**/terraform.tfstate
+**/terraform.tfstate.backup
+# **/.terraform.lock.hcl
+
+0721_AWSSDK/node_modules/*
