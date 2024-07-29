@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  app:
+    build: 
+      context: ./app
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db 
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+
+  db:
+    image: mysql:8.0
+    restart: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports: 
+      - "3305:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+
+volumes:
+  db-data:
+
+    
