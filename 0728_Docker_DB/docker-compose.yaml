@@ -12,13 +12,13 @@ services:
       - db 
     volumes:
       - ./app:/app
-    env_file:
+    env_file: # 환경변수 파일 설정
       - .env
 
   db:
     image: mysql:8.0
     restart: on-failure
-    environment:
+    environment: # 환경변수 설정 - .env 파일에 정의
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
