@@ -6,4 +6,6 @@ LectureNotes/*
 **/terraform.tfstate.backup
 # **/.terraform.lock.hcl
 
-0721_AWSSDK/node_modules/*
+**/node_modules/*
+
+**/.env
