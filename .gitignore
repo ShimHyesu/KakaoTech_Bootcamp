@@ -9,3 +9,5 @@ LectureNotes/*
 **/node_modules/*
 
 **/.env
+
+**/*.sql
