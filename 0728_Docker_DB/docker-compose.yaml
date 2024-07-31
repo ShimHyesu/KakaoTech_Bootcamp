@@ -14,20 +14,27 @@ services:
       - ./app:/app
     env_file: # 환경변수 파일 설정
       - .env
+    networks:
+      - app-network
 
   db:
-    image: mysql:8.0
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     restart: on-failure
     environment: # 환경변수 설정 - .env 파일에 정의
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_DATABASE}
     ports: 
-      - "3305:3306"
+      - "3307:3306"
     volumes: # db-data 볼륨에 저장되어 컨테이너가 재시작되거나 삭제되더라도 데이터가 유지
       - db-data:/var/lib/mysql
+    networks:
+      - app-network
 
 
 volumes:
   db-data:
 
-    
+networks:
+  app-network:
