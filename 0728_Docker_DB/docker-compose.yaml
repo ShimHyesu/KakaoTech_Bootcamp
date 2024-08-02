@@ -28,7 +28,7 @@ services:
     ports: 
       - "3307:3306"
     volumes: # db-data 볼륨에 저장되어 컨테이너가 재시작되거나 삭제되더라도 데이터가 유지
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/mariadb
     networks:
       - app-network
 
@@ -38,3 +38,4 @@ volumes:
 
 networks:
   app-network:
+    driver: bridge

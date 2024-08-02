@@ -4,5 +4,7 @@ FROM mariadb:latest
 # 데이터베이스 초기화 작업 진행
 COPY initdb.sql /docker-entrypoint-initdb.d
 
+# VOLUME [ "/var/lib/mariadb" ]
+
 # MariaDB Docker 이미지가 이미 ENTRYPOINT와 CMD를 설정해서 따로 지정하지 않아도 됨
 # CMD ["mariadbd"] 
