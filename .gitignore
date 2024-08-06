@@ -11,3 +11,5 @@ LectureNotes/*
 **/.env
 
 **/*.sql
+
+**/.DS_Store
