@@ -1,5 +1,4 @@
 *.pem
-LectureNotes/*
 
 **/.terraform/*
 **/terraform.tfstate
@@ -11,5 +10,3 @@ LectureNotes/*
 **/.env
 
 **/*.sql
-
-**/.DS_Store
