@@ -1,0 +1,59 @@
+#
+# 로컬
+#
+
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: elasticsearch
+    ports:
+      - 9200:9200
+    environment:
+      - cluster.name=bunch-dev
+      - discovery.type=single-node
+      - node.name=es01
+      - bootstrap.memory_lock=true # JVM이 사용 가능한 메모리를 잠그도록 설정 - 스와핑 방지
+      - xpack.security.enabled=false # 보안 기능 비활성화
+      - xpack.license.self_generated.type=trial # 라이선스 유형
+    mem_limit: ${ES_MEM_LIMIT} # 메모리 제한
+    ulimits: # 리눅스 운영체제의 자원 제한 설정
+     memlock:
+       soft: -1
+       hard: -1
+    networks:
+      - shared-net
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.0
+    container_name: logstash    
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    networks:
+      - shared-net
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - shared-net
+    depends_on:
+      - elasticsearch
+
+networks:
+  shared-net:
+    external: true # local kafka와 동일한 네트워크 사용
+
+volumes:
+  es_data:
