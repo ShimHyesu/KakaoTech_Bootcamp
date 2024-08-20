@@ -24,6 +24,17 @@ resource "aws_subnet" "subnet_2a" {
   }
 }
 
+resource "aws_subnet" "subnet_2c" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "192.166.2.0/24"
+  availability_zone       = "ap-northeast-2c"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "bunch_dev_subnet_2c_public"
+  }
+}
+
 
 
 # Public Route
@@ -48,18 +59,55 @@ resource "aws_route_table" "rtb_public" {
   }
 }
 
-resource "aws_route_table_association" "rtb_association_public" {
+resource "aws_route_table_association" "rtb_association_public_2a" {
   subnet_id      = aws_subnet.subnet_2a.id
+  route_table_id = aws_route_table.rtb_public.id
+}
+resource "aws_route_table_association" "rtb_association_public_2c" {
+  subnet_id      = aws_subnet.subnet_2c.id
   route_table_id = aws_route_table.rtb_public.id
 }
 
 
 
 # Security Group 
-# TODO: 나중에 따로 만들기
 resource "aws_security_group" "sg" {
   name        = "bunch_dev_sg"
   description = "Security group"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress { # ping - 모든 ICMP, 내 VPC
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["192.166.0.0/16"] 
+  }
+
+  ingress {
+    from_port   = 8081
+    to_port     = 8081
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "sg_kafka" {
+  name        = "bunch_dev_sg_kafka"
+  description = "Security group for Kafka"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -146,12 +194,48 @@ resource "aws_security_group" "sg_elk" {
   }
 }
 
+resource "aws_security_group" "sg_db" {
+  name        = "bunch_dev_sg_db"
+  description = "Security group for DB"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress { # ping - 모든 ICMP, 내 VPC
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["192.166.0.0/16"] 
+  }
+
+  ingress { # mariadb
+    from_port = 3306
+    to_port = 3306
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+
+
 
 # EC2 Instance
 resource "aws_instance" "server_instance" {
-  count         = 1
   ami           = "ami-045f2d6eeb07ce8c0" # amazon linux
-  instance_type = "t2.micro"
+  instance_type = "t3.medium"
   key_name      = "bunch-key"
   subnet_id     = aws_subnet.subnet_2a.id
   vpc_security_group_ids = [aws_security_group.sg.id]
@@ -165,8 +249,8 @@ resource "aws_instance" "mariadb_instance" {
   ami           = "ami-045f2d6eeb07ce8c0" # amazon linux
   instance_type = "t3.medium"
   key_name      = "bunch-key"
-  subnet_id     = aws_subnet.subnet_2a.id
-  vpc_security_group_ids = [aws_security_group.sg.id]
+  subnet_id     = aws_subnet.subnet_2c.id
+  vpc_security_group_ids = [aws_security_group.sg_db.id]
 
   tags = {
     Name = "bunch_dev_mariadb_instance"
@@ -178,7 +262,7 @@ resource "aws_instance" "kafka_instance" {
   instance_type = "t3.large"
   key_name      = "bunch-key"
   subnet_id     = aws_subnet.subnet_2a.id
-  vpc_security_group_ids = [aws_security_group.sg.id]
+  vpc_security_group_ids = [aws_security_group.sg_kafka.id]
 
   tags = {
     Name = "bunch_dev_kafka_instance"
@@ -189,7 +273,7 @@ resource "aws_instance" "elk_instance" {
   ami           = "ami-045f2d6eeb07ce8c0" # amazon linux
   instance_type = "m5.xlarge"
   key_name      = "bunch-key"
-  subnet_id     = aws_subnet.subnet_2a.id
+  subnet_id     = aws_subnet.subnet_2c.id
   vpc_security_group_ids = [aws_security_group.sg_elk.id]
   
   root_block_device {
@@ -199,5 +283,15 @@ resource "aws_instance" "elk_instance" {
 
   tags = {
     Name = "bunch_dev_elk_instance"
+  }
+}provider "aws" {
+  region = "ap-northeast-2"
+}
+
+resource "aws_vpc" "main" {
+  cidr_block = "192.166.0.0/16"
+
+  tags = {
+    Name = "bunch_dev_vpc"
   }
 }
