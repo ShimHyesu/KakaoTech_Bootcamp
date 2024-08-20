@@ -1,0 +1,49 @@
+#
+# Docker, Docker Compose 설치 및 설정을 위한 Ansible Playbook
+#
+
+- hosts: init_hosts
+  become: true # sudo로 진행할건지
+
+  tasks:
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Add ec2-user to the Docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: true  # 기존 그룹에 추가
+
+    - name: Download Docker Compose binary
+      get_url:
+        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Verify Docker installation
+      command: docker -v
+      register: docker_version
+
+    - debug:
+        msg: "Docker version => {{ docker_version.stdout }}"
+
+    - name: Verify Docker Compose installation
+      command: docker-compose -v
+      register: docker_compose_version
+
+    - debug:
+        msg: "Docker Compose version => {{ docker_compose_version.stdout }}"
