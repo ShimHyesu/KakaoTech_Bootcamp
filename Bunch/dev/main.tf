@@ -271,7 +271,7 @@ resource "aws_instance" "kafka_instance" {
 
 resource "aws_instance" "elk_instance" {
   ami           = "ami-045f2d6eeb07ce8c0" # amazon linux
-  instance_type = "m5.xlarge"
+  instance_type = "m5.large"
   key_name      = "bunch-key"
   subnet_id     = aws_subnet.subnet_2c.id
   vpc_security_group_ids = [aws_security_group.sg_elk.id]
@@ -283,15 +283,5 @@ resource "aws_instance" "elk_instance" {
 
   tags = {
     Name = "bunch_dev_elk_instance"
-  }
-}provider "aws" {
-  region = "ap-northeast-2"
-}
-
-resource "aws_vpc" "main" {
-  cidr_block = "192.166.0.0/16"
-
-  tags = {
-    Name = "bunch_dev_vpc"
   }
 }
