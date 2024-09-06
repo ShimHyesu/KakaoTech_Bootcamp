@@ -10,3 +10,9 @@
 **/.env
 
 **/*.sql
+
+.DS_Store
+
+*.drawio
+*.svg
+*.png
